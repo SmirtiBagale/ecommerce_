@@ -1,0 +1,76 @@
+{% extends 'store/base.html' %} {% load static %} {% block title %}Checkout -
+Hamro Store{% endblock %} {% block content %}
+<h2>Checkout</h2>
+
+<form method="post">
+  {% csrf_token %}
+  <div class="mb-3">
+    <label>Full Name</label>
+    <input type="text" name="full_name" class="form-control" required />
+  </div>
+  <div class="mb-3">
+    <label>Address</label>
+    <textarea name="address" class="form-control" required></textarea>
+  </div>
+  <div class="mb-3">
+    <label>Phone</label>
+    <input type="text" name="phone" class="form-control" required />
+  </div>
+  <button type="submit" class="btn btn-primary">Place Order</button>
+</form>
+
+<!-- Move the Khalti button here inside content -->
+<img
+  id="khalti-pay-btn"
+  src="{% static 'images/khalti-logo.png' %}"
+  alt="Pay with Khalti"
+  style="cursor: pointer; width: 150px; margin-top: 1px"
+/>
+
+{% endblock %} {% block extra_js %}
+<script src="https://khalti.com/static/khalti-checkout.js"></script>
+<script>
+  var config = {
+    publicKey: "test_public_key_dc74b7cd....",  // Replace with your test/public key
+    productIdentity: "{{ order_id }}",
+    productName: "Hamro Store Order",
+    productUrl: "http://localhost:8000/",
+    eventHandler: {
+      onSuccess(payload) {
+        console.log(payload);
+        fetch("{% url 'verify_khalti_payment' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            alert("Payment successful!");
+            window.location.href = "/order/success/";
+          } else {
+            alert("Payment verification failed.");
+          }
+        });
+      },
+      onError(error) {
+        console.log(error);
+        alert("Khalti payment failed.");
+      },
+      onClose() {
+        console.log("Khalti widget closed");
+      }
+    }
+  };
+
+  var checkout = new KhaltiCheckout(config);
+  document.getElementById("khalti-pay-btn").onclick = function () {
+   checkout.show({ amount: {{ total_in_paisa }} });
+
+
+  };
+</script>
+{% endblock %}

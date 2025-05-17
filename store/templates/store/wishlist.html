@@ -1,0 +1,90 @@
+{% extends 'store/base.html' %} {% block title %}Your Wishlist - Hamro
+Store{%endblock %} {% block content %}
+<h1>Your Wishlist</h1>
+{% if wishlist_items %}
+<div class="row">
+  {% for item in wishlist_items %}
+  <div class="col-md-4 mb-4">
+    <div class="card">
+      <img
+        src="{{ item.product.image.url }}"
+        class="card-img-top"
+        height="200"
+        style="object-fit: cover"
+      />
+      <div class="card-body">
+        <h5 class="card-title">{{ item.product.name }}</h5>
+        <p class="card-text">{{ item.product.description|slice:":80" }}...</p>
+        <p class="fw-bold">Rs. {{ item.product.price }}</p>
+        <button
+          class="btn btn-success add-to-cart-from-wishlist-btn"
+          data-id="{{ item.product.id }}"
+        >
+          Add to Cart
+        </button>
+        <button
+          class="btn btn-danger btn-sm remove-wishlist-btn"
+          data-id="{{ item.product.id }}"
+        >
+          Remove
+        </button>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p>Your wishlist is empty.</p>
+{% endif %} {% endblock %} {% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const wishlistToastElement = document.getElementById("wishlist-toast");
+    const wishlistToastMessage = document.getElementById(
+      "wishlist-toast-message"
+    );
+    const wishlistToast = new bootstrap.Toast(wishlistToastElement);
+
+    document.querySelectorAll(".remove-wishlist-btn").forEach((button) => {
+      button.addEventListener("click", function () {
+        const productId = this.getAttribute("data-id");
+        fetch(`/remove-from-wishlist/${productId}/`, {
+          method: "GET",
+          headers: { "X-Requested-With": "XMLHttpRequest" },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            wishlistToastMessage.innerText = `${data.productName} - ${data.message}`;
+            wishlistToast.show();
+            location.reload(); // reload to update list and count
+          })
+          .catch(console.error);
+      });
+    });
+    document
+      .querySelectorAll(".add-to-cart-from-wishlist-btn")
+      .forEach((button) => {
+        button.addEventListener("click", function () {
+          const productId = this.getAttribute("data-id");
+
+          fetch(`/add-to-cart/${productId}/`, {
+            method: "GET",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              const cartToastElement = document.getElementById("cart-toast");
+              const cartToastMessage = document.getElementById("toast-message");
+              const cartToast = new bootstrap.Toast(cartToastElement);
+
+              cartToastMessage.innerText = `${data.productName} added to cart`;
+              cartToast.show();
+
+              // Optionally, remove from wishlist immediately or reload page
+              location.reload();
+            })
+            .catch(console.error);
+        });
+      });
+  });
+</script>
+{% endblock %}
