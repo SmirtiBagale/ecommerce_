@@ -140,8 +140,8 @@ LOGIN_REDIRECT_URL = reverse_lazy('home')
 LOGOUT_REDIRECT_URL = '/'
 
 # settings.py
-STRIPE_PUBLIC_KEY = 'pk_test_51RPvvbP61vgnFmcwErmFfslNO9UncyhMHT8ZoQAe9itJabQgZR9PbRGIbrD7fjdIYCt4ZgPQjyB5gindXsdC9HNK00cwiWM3qp'
-STRIPE_SECRET_KEY = 'sk_test_51RPvvbP61vgnFmcwPLrGyBxarSVvEa81d0dpyfso3Tz1mpCwqfM31buo9Lw1xhC0FZMzyEkT24EDjQ70XpTKepKw00Xkd7y3hf'
+STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
 
 # settings.py
 
