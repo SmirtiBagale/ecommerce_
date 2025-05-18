@@ -12,7 +12,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
-
+from dotenv import load_dotenv
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -142,4 +143,13 @@ LOGOUT_REDIRECT_URL = '/'
 STRIPE_PUBLIC_KEY = 'pk_test_51RPvvbP61vgnFmcwErmFfslNO9UncyhMHT8ZoQAe9itJabQgZR9PbRGIbrD7fjdIYCt4ZgPQjyB5gindXsdC9HNK00cwiWM3qp'
 STRIPE_SECRET_KEY = 'sk_test_51RPvvbP61vgnFmcwPLrGyBxarSVvEa81d0dpyfso3Tz1mpCwqfM31buo9Lw1xhC0FZMzyEkT24EDjQ70XpTKepKw00Xkd7y3hf'
 
+# settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')       # your email
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')    # your email password or app password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 

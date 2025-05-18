@@ -1,15 +1,27 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.http import JsonResponse
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
 from django.contrib import messages
+
+from store.forms import CustomUserCreationForm
 from .models import Product, Order, OrderItem, WishlistItem
 import stripe
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.http import HttpResponse
+from io import BytesIO
+from django.core.mail import send_mail
+from django.conf import settings
+
+
+
+
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -128,35 +140,98 @@ def wishlist_view(request):
     return render(request, 'store/wishlist.html', {'wishlist_items': items})
 
 
+# def register(request):
+#     """User registration view."""
+#     if request.user.is_authenticated:
+#         return redirect('home')
+
+#     if request.method == 'POST':
+#         form = UserCreationForm(request.POST)
+#         if form.is_valid():
+#             user = form.save()
+#             login(request, user)
+#             return redirect('home')
+#     else:
+#         form = UserCreationForm()
+
+#     return render(request, 'store/register.html', {'form': form})
 def register(request):
-    """User registration view."""
+    """Enhanced user registration view with email support."""
     if request.user.is_authenticated:
+        messages.info(request, "You're already logged in!")
         return redirect('home')
 
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)  # Use custom form
         if form.is_valid():
             user = form.save()
+            
+            # Log the user in automatically
             login(request, user)
+            
+            # Send welcome email
+            send_mail(
+                subject="Welcome to Our Store!",
+                message=f"Hi {user.username},\n\nThanks for registering with us!",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=True
+            )
+            
+            messages.success(request, "Registration successful! Welcome!")
             return redirect('home')
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
 
-    return render(request, 'store/register.html', {'form': form})
+    return render(request, 'store/register.html', {
+        'form': form,
+        'title': 'Create Account'
+    })
 
+
+# class UserRegisterView(CreateView):
+#     """Class-based user registration view."""
+#     form_class = UserCreationForm
+#     template_name = 'store/register.html'
+#     success_url = reverse_lazy('login')
+
+#     def form_valid(self, form):
+#         user = form.save(commit=False)
+#         user.is_staff = False
+#         user.is_superuser = False
+#         user.save()
+#         return super().form_valid(form)
 
 class UserRegisterView(CreateView):
-    """Class-based user registration view."""
-    form_class = UserCreationForm
+    """Enhanced class-based registration view with email support."""
+    form_class = CustomUserCreationForm  # Using custom form
     template_name = 'store/register.html'
-    success_url = reverse_lazy('login')
+    success_url = reverse_lazy('home')  # Redirect to home after registration
+    
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            messages.info(request, "You're already logged in!")
+            return redirect(self.success_url)
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        user = form.save(commit=False)
-        user.is_staff = False
-        user.is_superuser = False
-        user.save()
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        user = form.instance
+        
+        # Log the user in after registration
+        login(self.request, user)
+        
+        # Send welcome email
+        send_mail(
+            subject="Welcome to Our Store!",
+            message=f"Hi {user.username},\n\nThanks for registering with us!",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=True
+        )
+        
+        messages.success(self.request, "Registration successful! Welcome!")
+        return response
 
 
 @login_required
@@ -214,13 +289,15 @@ def create_checkout_session(request):
         return redirect('checkout')
 
     order = get_object_or_404(Order, id=order_id)
-    total_amount = int(order.total_price * 100)  # Stripe requires amount in cents
+    
+    # Convert total price to paisa with proper rounding
+    total_amount = int((order.total_price * Decimal('100')).quantize(Decimal('1'), rounding=ROUND_HALF_UP))
 
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
         line_items=[{
             'price_data': {
-                'currency': 'usd',  # Change if needed
+                'currency': 'npr',
                 'product_data': {
                     'name': f'Hamro Store Order #{order.id}',
                 },
@@ -239,3 +316,55 @@ def create_checkout_session(request):
 def order_success(request):
     """Render order success page after successful payment or COD."""
     return render(request, 'store/order_success.html')
+
+
+@login_required
+def my_orders(request):
+    """Display all orders placed by the logged-in user."""
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'store/my_orders.html', {'orders': orders})
+
+@login_required
+def order_detail(request, order_id):
+    """Show details for a specific order."""
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'store/order_detail.html', {'order': order})
+
+
+@login_required
+def download_invoice(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    template = get_template('store/invoice.html')
+    html = template.render({'order': order})
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="invoice_order_{order.id}.pdf"'
+
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return HttpResponse('Failed to generate PDF', status=500)
+    return response
+@login_required
+def cancel_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    if order.status == 'Pending':
+        order.status = 'Cancelled'
+        order.save()
+        
+        # Send cancellation email
+        subject = f'Order #{order.id} Cancelled'
+        message = (
+            f"Hello {order.full_name},\n\n"
+            f"Your order #{order.id} has been successfully cancelled.\n\n"
+            f"If you have any questions, please contact us.\n\n"
+            f"Thank you,\nLatta Clothing Team"
+        )
+        recipient_list = [order.user.email]
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient_list)
+        
+        messages.success(request, 'Your order has been cancelled. A confirmation email has been sent.')
+    else:
+        messages.warning(request, 'Order cannot be cancelled.')
+
+    return redirect('order_detail', order_id=order.id)
+

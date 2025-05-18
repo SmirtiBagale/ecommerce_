@@ -1,0 +1,31 @@
+{% extends 'store/base.html' %}
+{% block title %}Order #{{ order.id }} Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Order #{{ order.id }}</h2>
+  <p><strong>Status:</strong> {{ order.status }}</p>
+  <p><strong>Date:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</p>
+  <p><strong>Total:</strong> Rs. {{ order.total_price }}</p>
+  <p><strong>Payment Method:</strong> {{ order.get_payment_method_display }}</p>
+
+  <hr>
+  <h4>Items</h4>
+  <ul class="list-group mb-3">
+    {% for item in order.items.all %}
+    <li class="list-group-item d-flex justify-content-between">
+      {{ item.quantity }} × {{ item.product.name }}
+      <span>Rs. {{ item.price }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  <a href="{% url 'download_invoice' order.id %}" class="btn btn-outline-secondary">Download Invoice</a>
+  {% if order.status == 'Pending' %}
+  <a href="{% url 'cancel_order' order.id %}" class="btn btn-danger">Cancel Order</a>
+{% endif %}
+
+
+
+  <a href="{% url 'my_orders' %}" class="btn btn-secondary">Back to Orders</a>
+</div>
+{% endblock %}

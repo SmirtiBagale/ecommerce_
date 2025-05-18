@@ -19,6 +19,7 @@ urlpatterns = [
 
     # User authentication URLs
     path('register/', UserRegisterView.as_view(), name='register'),
+    
     path('login/', auth_views.LoginView.as_view(template_name='store/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
 
@@ -26,4 +27,10 @@ urlpatterns = [
     path('checkout/', views.checkout, name='checkout'),
     path('create-checkout-session/', views.create_checkout_session, name='create_checkout_session'),
     path('order/success/', views.order_success, name='order_success'),
+    path('my-orders/', views.my_orders, name='my_orders'),
+    path('order/<int:order_id>/', views.order_detail, name='order_detail'),
+    path('my-orders/<int:order_id>/invoice/', views.download_invoice, name='download_invoice'),
+    path('my-orders/<int:order_id>/cancel/', views.cancel_order, name='cancel_order'),
+
+
 ]
