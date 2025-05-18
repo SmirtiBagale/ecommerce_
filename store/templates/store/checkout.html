@@ -1,76 +1,89 @@
 {% extends 'store/base.html' %} {% load static %} {% block title %}Checkout -
 Hamro Store{% endblock %} {% block content %}
-<h2>Checkout</h2>
+<div class="container mt-4">
+  <h2>Checkout</h2>
 
-<form method="post">
-  {% csrf_token %}
-  <div class="mb-3">
-    <label>Full Name</label>
-    <input type="text" name="full_name" class="form-control" required />
-  </div>
-  <div class="mb-3">
-    <label>Address</label>
-    <textarea name="address" class="form-control" required></textarea>
-  </div>
-  <div class="mb-3">
-    <label>Phone</label>
-    <input type="text" name="phone" class="form-control" required />
-  </div>
-  <button type="submit" class="btn btn-primary">Place Order</button>
-</form>
+  <!-- Checkout form posting to the checkout view -->
+  <form method="post" action="{% url 'checkout' %}">
+    {% csrf_token %}
 
-<!-- Move the Khalti button here inside content -->
-<img
-  id="khalti-pay-btn"
-  src="{% static 'images/khalti-logo.png' %}"
-  alt="Pay with Khalti"
-  style="cursor: pointer; width: 150px; margin-top: 1px"
-/>
+    <!-- Full name input -->
+    <div class="mb-3">
+      <label for="full_name" class="form-label">Full Name</label>
+      <input
+        type="text"
+        name="full_name"
+        class="form-control"
+        id="full_name"
+        required
+      />
+    </div>
 
+    <!-- Phone number input -->
+    <div class="mb-3">
+      <label for="phone" class="form-label">Phone</label>
+      <input
+        type="text"
+        name="phone"
+        class="form-control"
+        id="phone"
+        required
+      />
+    </div>
+
+    <!-- Address textarea -->
+    <div class="mb-3">
+      <label for="address" class="form-label">Address</label>
+      <textarea
+        name="address"
+        class="form-control"
+        id="address"
+        required
+      ></textarea>
+    </div>
+
+    <!-- Payment method radio buttons -->
+    <div class="mb-3">
+      <label class="form-label">Payment Method</label><br />
+      <input type="radio" id="cod" name="payment_method" value="cod" required />
+      <label for="cod">Cash on Delivery</label><br />
+      <input
+        type="radio"
+        id="stripe"
+        name="payment_method"
+        value="stripe"
+        required
+      />
+      <label for="stripe">Pay with Stripe</label>
+    </div>
+
+    <!-- Stripe instruction shown only when Stripe is selected -->
+    <div id="stripe-instructions" class="alert alert-info d-none">
+      You will be redirected to Stripe for payment after placing the order.
+    </div>
+
+    <!-- Submit button -->
+    <button type="submit" class="btn btn-primary">Place Order</button>
+  </form>
+</div>
 {% endblock %} {% block extra_js %}
-<script src="https://khalti.com/static/khalti-checkout.js"></script>
 <script>
-  var config = {
-    publicKey: "test_public_key_dc74b7cd....",  // Replace with your test/public key
-    productIdentity: "{{ order_id }}",
-    productName: "Hamro Store Order",
-    productUrl: "http://localhost:8000/",
-    eventHandler: {
-      onSuccess(payload) {
-        console.log(payload);
-        fetch("{% url 'verify_khalti_payment' %}", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}"
-          },
-          body: JSON.stringify(payload)
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            alert("Payment successful!");
-            window.location.href = "/order/success/";
-          } else {
-            alert("Payment verification failed.");
-          }
-        });
-      },
-      onError(error) {
-        console.log(error);
-        alert("Khalti payment failed.");
-      },
-      onClose() {
-        console.log("Khalti widget closed");
-      }
+  // Elements
+  const stripeRadio = document.getElementById("stripe");
+  const codRadio = document.getElementById("cod");
+  const stripeInstructions = document.getElementById("stripe-instructions");
+
+  // Show/hide Stripe instructions based on selected payment method
+  function toggleStripeInfo() {
+    if (stripeRadio.checked) {
+      stripeInstructions.classList.remove("d-none");
+    } else {
+      stripeInstructions.classList.add("d-none");
     }
-  };
+  }
 
-  var checkout = new KhaltiCheckout(config);
-  document.getElementById("khalti-pay-btn").onclick = function () {
-   checkout.show({ amount: {{ total_in_paisa }} });
-
-
-  };
+  // Attach event listeners to radio buttons
+  stripeRadio.addEventListener("change", toggleStripeInfo);
+  codRadio.addEventListener("change", toggleStripeInfo);
 </script>
 {% endblock %}

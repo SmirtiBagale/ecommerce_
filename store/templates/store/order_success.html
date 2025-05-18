@@ -1,8 +1,10 @@
 {% extends 'store/base.html' %}
-{% block title %}Order Successful - Hamro Store{% endblock %}
+{% block title %}Order Success{% endblock %}
 
 {% block content %}
-<h2>Thank you for your order!</h2>
-<p>Your order ID is <strong>#{{ order.id }}</strong>.</p>
-<a href="{% url 'home' %}" class="btn btn-success">Continue Shopping</a>
+<div class="container mt-4 text-center">
+    <h2>Thank You for Your Order!</h2>
+    <p>Your order has been placed successfully.</p>
+    <a href="{% url 'home' %}" class="btn btn-primary mt-3">Continue Shopping</a>
+</div>
 {% endblock %}
