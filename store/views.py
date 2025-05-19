@@ -23,6 +23,7 @@ from django.conf import settings
 
 
 
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
@@ -367,4 +368,6 @@ def cancel_order(request, order_id):
         messages.warning(request, 'Order cannot be cancelled.')
 
     return redirect('order_detail', order_id=order.id)
+
+
 
