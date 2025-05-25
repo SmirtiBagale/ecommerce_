@@ -21,3 +21,13 @@
   {% endif %}
 </div>
 {% endblock %}
+<span class="badge 
+    {% if order.status == 'Pending' %}bg-warning
+    {% elif order.status == 'Processing' %}bg-info
+    {% elif order.status == 'Shipped' %}bg-primary
+    {% elif order.status == 'Delivered' %}bg-success
+    {% elif order.status == 'Cancelled' %}bg-danger
+    {% endif %}">
+    {{ order.status }}
+</span>
+

@@ -1,6 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from django.core.validators import validate_email
+from .models import Review
 
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(
@@ -25,3 +26,8 @@ class CustomUserCreationForm(UserCreationForm):
         if email and self._meta.model.objects.filter(email__iexact=email).exists():
             raise forms.ValidationError("A user with that email already exists.")
         return email
+    
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['rating', 'comment']

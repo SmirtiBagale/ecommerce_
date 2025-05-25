@@ -18,7 +18,8 @@ from django.http import HttpResponse
 from io import BytesIO
 from django.core.mail import send_mail
 from django.conf import settings
-
+from .forms import ReviewForm
+from .models import Product, Review
 
 
 
@@ -327,9 +328,38 @@ def my_orders(request):
 
 @login_required
 def order_detail(request, order_id):
-    """Show details for a specific order."""
     order = get_object_or_404(Order, id=order_id, user=request.user)
-    return render(request, 'store/order_detail.html', {'order': order})
+    review_forms = {}
+
+    for item in order.items.all():
+        product = item.product
+        # Check if the user has already reviewed this product
+        existing_review = Review.objects.filter(product=product, user=request.user).first()
+        if not existing_review:
+            review_forms[product.id] = ReviewForm()
+
+    if request.method == 'POST':
+        product_id = request.POST.get('product_id')
+        product = get_object_or_404(Product, id=product_id)
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            Review.objects.create(
+                product=product,
+                user=request.user,
+                rating=form.cleaned_data['rating'],
+                comment=form.cleaned_data['comment']
+            )
+            messages.success(request, 'Review submitted successfully.')
+            return redirect('order_detail', order_id=order_id)
+
+    reviews = Review.objects.filter(product__in=[item.product for item in order.items.all()], user=request.user)
+
+    context = {
+        'order': order,
+        'review_forms': review_forms,
+        'reviews': reviews,
+    }
+    return render(request, 'store/order_detail.html', context)
 
 
 @login_required
@@ -370,4 +400,30 @@ def cancel_order(request, order_id):
     return redirect('order_detail', order_id=order.id)
 
 
+@login_required
+def product_detail(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    reviews = product.reviews.all()
+    form = ReviewForm()
 
+    # Handle review submission
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review, created = Review.objects.get_or_create(
+                user=request.user,
+                product=product,
+                defaults=form.cleaned_data
+            )
+            if not created:
+                messages.error(request, "You have already submitted a review for this product.")
+            else:
+                messages.success(request, "Thank you for your review!")
+            return redirect('product_detail', product_id=product.id)
+
+    context = {
+        'product': product,
+        'reviews': reviews,
+        'form': form,
+    }
+    return render(request, 'store/product_detail.html', context)

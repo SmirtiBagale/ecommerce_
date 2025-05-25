@@ -1,31 +1,105 @@
 {% extends 'store/base.html' %}
+{% load custom_filters %}
+
+
 {% block title %}Order #{{ order.id }} Details{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
   <h2>Order #{{ order.id }}</h2>
-  <p><strong>Status:</strong> {{ order.status }}</p>
-  <p><strong>Date:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</p>
-  <p><strong>Total:</strong> Rs. {{ order.total_price }}</p>
-  <p><strong>Payment Method:</strong> {{ order.get_payment_method_display }}</p>
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <p><strong>Status:</strong> 
+        <span class="badge 
+          {% if order.status == 'Completed' %}bg-success
+          {% elif order.status == 'Pending' %}bg-warning text-dark
+          {% elif order.status == 'Cancelled' %}bg-danger
+          {% else %}bg-secondary{% endif %}">
+          {{ order.status }}
+        </span>
+      </p>
+      <p><strong>Date:</strong> {{ order.created_at|date:"F j, Y H:i" }}</p>
+    </div>
+    <div class="col-md-6">
+      <p><strong>Total:</strong> Rs. {{ order.total_price|floatformat:2 }}</p>
+      <p><strong>Payment Method:</strong> {{ order.get_payment_method_display }}</p>
+    </div>
+  </div>
 
-  <hr>
-  <h4>Items</h4>
-  <ul class="list-group mb-3">
+  <h4>Order Items</h4>
+  <div class="list-group mb-4">
     {% for item in order.items.all %}
-    <li class="list-group-item d-flex justify-content-between">
-      {{ item.quantity }} × {{ item.product.name }}
-      <span>Rs. {{ item.price }}</span>
-    </li>
+    <div class="list-group-item">
+      <div class="d-flex justify-content-between">
+        <div>
+          <h5>{{ item.product.name }}</h5>
+          <p class="mb-1">Quantity: {{ item.quantity }}</p>
+          <p class="mb-1">Price: Rs. {{ item.price|floatformat:2 }}</p>
+        </div>
+        <div class="text-end">
+          <p>Subtotal: Rs. {{ item.get_total|floatformat:2 }}</p>
+        </div>
+      </div>
+
+      {# Review section #}
+      <div class="mt-3">
+        {% for review in reviews %}
+          {% if review.product.id == item.product.id %}
+            <div class="p-2 bg-light rounded mb-2">
+              <strong>Your Review:</strong>
+              <span class="text-warning">
+                {% for i in "12345" %}
+                  {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                {% endfor %}
+              </span>
+              <p class="mb-0">{{ review.comment }}</p>
+            </div>
+          {% endif %}
+        {% endfor %}
+
+        {% if user.is_authenticated %}
+          {% for product_id, form in review_forms.items %}
+            {% if product_id == item.product.id %}
+              <form method="post" class="mt-2">
+                {% csrf_token %}
+                <div class="mb-2">
+                  <label class="form-label">Rating</label>
+                  {{ form.rating }}
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Comment</label>
+                  {{ form.comment }}
+                </div>
+                <input type="hidden" name="product_id" value="{{ item.product.id }}" />
+                <button type="submit" class="btn btn-sm btn-primary">
+                  Submit Review
+                </button>
+              </form>
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          <a href="{% url 'login' %}?next={% url 'order_detail' order.id %}" 
+             class="btn btn-sm btn-outline-primary">
+            Login to leave a review
+          </a>
+        {% endif %}
+      </div>
+    </div>
     {% endfor %}
-  </ul>
-  <a href="{% url 'download_invoice' order.id %}" class="btn btn-outline-secondary">Download Invoice</a>
-  {% if order.status == 'Pending' %}
-  <a href="{% url 'cancel_order' order.id %}" class="btn btn-danger">Cancel Order</a>
-{% endif %}
+  </div>
 
-
-
-  <a href="{% url 'my_orders' %}" class="btn btn-secondary">Back to Orders</a>
+  <div class="d-flex flex-wrap gap-2 mb-4">
+    <a href="{% url 'download_invoice' order.id %}" class="btn btn-outline-primary">
+      Download Invoice
+    </a>
+    {% if order.status == 'Pending' %}
+    <a href="{% url 'cancel_order' order.id %}" class="btn btn-danger">
+      Cancel Order
+    </a>
+    {% endif %}
+    <a href="{% url 'my_orders' %}" class="btn btn-secondary">
+      Back to Orders
+    </a>
+  </div>
 </div>
 {% endblock %}

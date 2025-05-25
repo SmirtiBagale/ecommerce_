@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
-    <a class="navbar-brand" href="{% url 'home' %}">Hamro Store</a>
+    <a class="navbar-brand" href="{% url 'home' %}">Latta Clothing</a>
 
     <ul class="navbar-nav ms-auto">
       <li class="nav-item me-2">
@@ -13,7 +13,7 @@
       <li class="nav-item me-2">
         <a href="{% url 'wishlist' %}" class="btn btn-outline-dark">
           ❤️ Wishlist (<span id="wishlist-count"
-            >{{ request.user.wishlistitem_set.count }}</span
+            >{{ request.user.wishlistitem_set.count|length|default:0  }}</span
           >)
         </a>
       </li>
