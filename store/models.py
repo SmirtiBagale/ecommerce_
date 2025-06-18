@@ -35,8 +35,18 @@ class Product(models.Model):
     """
     Represents a product in the store with base information.
     """
+    CATEGORY = [
+        ('Pant','Pant'),
+        ('Shirt','Shirt'),
+        ('T-Shirt','T-Shirt'),
+        ('Sweater','Sweater'),
+        ('Formal','Coat & Blazer'),
+
+    ]
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
+    category = models.CharField(max_length=50,choices=CATEGORY,default='')
+    
     base_price = models.DecimalField(
         max_digits=10, 
         decimal_places=2,

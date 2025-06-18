@@ -14,6 +14,7 @@ Store{%endblock %} {% block content %}
       <div class="card-body">
         <h5 class="card-title">{{ product.name }}</h5>
         <p class="card-text">{{ product.description|slice:":80" }}...</p>
+        <p>{{product.category}} </p>
         <p class="fw-bold">Rs. {{ product.price }}</p>
         <button
           class="btn btn-primary add-to-cart-btn"
