@@ -26,12 +26,35 @@ from .models import Product, Review
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
-
-
 def home(request):
-    """Display available products on homepage."""
     products = Product.objects.filter(is_available=True)
-    return render(request, 'store/home.html', {'products': products})
+    categories = Product.CATEGORY
+    print("DEBUG categories:", categories)  # This will print in terminal
+    return render(request, 'store/home.html', {
+        'products': products,
+        'categories': categories,
+    })
+
+
+def filter_products(request):
+    selected_categories = request.GET.getlist('category[]')
+    products = Product.objects.all()
+
+    if selected_categories:
+        products = products.filter(category__in=selected_categories)
+
+    data = []
+    for product in products:
+        data.append({
+            'name': product.name,
+            'price': str(product.price),
+            'category': product.get_category_display(),
+            'image_url': product.image.url if product.image else ''
+        })
+
+    return JsonResponse({'products': data})
+
+
 
 
 def add_to_cart(request, product_id):

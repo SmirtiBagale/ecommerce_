@@ -1,97 +1,243 @@
-{% extends 'store/base.html' %} {% block title %}Products - Hamro
-Store{%endblock %} {% block content %}
-<h1 class="mb-4">All Products</h1>
-<div class="row">
-  {% for product in products %}
-  <div class="col-md-4 mb-4">
-    <div class="card">
-      <img
-        src="{{ product.image.url }}"
-        class="card-img-top"
-        height="200"
-        style="object-fit: cover"
-      />
-      <div class="card-body">
-        <h5 class="card-title">{{ product.name }}</h5>
-        <p class="card-text">{{ product.description|slice:":80" }}...</p>
-        <p>{{product.category}} </p>
-        <p class="fw-bold">Rs. {{ product.price }}</p>
-        <button
-          class="btn btn-primary add-to-cart-btn"
-          data-id="{{ product.id }}"
-        >
-          Add to Cart
-        </button>
-        <button
-          class="btn btn-outline-danger btn-sm wishlist-btn"
-          data-id="{{ product.id }}"
-        >
-          ❤️
-        </button>
+{% extends 'store/base.html' %} 
+{% block title %}
+Products - Hamro Store
+{% endblock %}
+{% block content %}
+
+<style>
+  .sticky-sidebar {
+    position: sticky;
+    top: 80px; /* Adjust if your navbar is taller or shorter */
+  }
+
+  /* Sidebar styling */
+  .sidebar {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    height: 100%;
+    position: sticky;
+    top: 20px;
+    
+  }
+  .sidebar h5 {
+    font-weight: 600;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 8px;
+  }
+  .form-check {
+    margin-bottom: 12px;
+  }
+
+  /* Product card styling */
+  .product-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.3s ease;
+  }
+  .product-card:hover {
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+  }
+  .product-card img {
+    height: 200px;
+    object-fit: cover;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+  .product-card-body {
+    padding: 15px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .product-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    flex-grow: 1;
+  }
+  .product-price {
+    font-size: 1.15rem;
+    color: #28a745;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  /* Buttons */
+  .btn-add-cart {
+    margin-bottom: 8px;
+  }
+
+  /* Responsive tweaks */
+  @media (max-width: 768px) {
+    .sidebar {
+      position: static;
+      margin-bottom: 20px;
+      height: auto;
+    }
+  }
+</style>
+
+<div class="container-fluid">
+  {% comment %} <h1 class="mb-4">All Products</h1> {% endcomment %}
+  <div class="row">
+    <!-- Sidebar Filter -->
+    <div class="col-md-3 sidebar">
+      <h5>Filter by Category</h5>
+      <form id="filter-form">
+        {% for value, label in categories %}
+        <div class="form-check">
+          <input
+            class="form-check-input category-filter"
+            type="checkbox"
+            value="{{ value }}"
+            id="category-{{ forloop.counter }}"
+          />
+          <label class="form-check-label" for="category-{{ forloop.counter }}">
+            {{ label }}
+          </label>
+        </div>
+        {% endfor %}
+      </form>
+    </div>
+
+    <!-- Product List -->
+    <div class="col-md-9">
+      <div class="row" id="product-list">
+        {% for product in products %}
+        <div class="col-md-4 mb-4">
+          <div class="card product-card">
+            <img
+              src="{{ product.image.url }}"
+              class="card-img-top"
+              alt="{{ product.name }}"
+            />
+            <div class="card-body product-card-body">
+              <h5 class="product-title">{{ product.name }}</h5>
+              <p class="text-muted">{{ product.description|slice:":80" }}...</p>
+              <p class="text-secondary">{{ product.get_category_display }}</p>
+              <p class="product-price">Rs. {{ product.price }}</p>
+              <button
+                class="btn btn-primary btn-add-cart add-to-cart-btn"
+                data-id="{{ product.id }}"
+              >
+                Add to Cart
+              </button>
+              <button
+                class="btn btn-outline-danger btn-sm wishlist-btn"
+                data-id="{{ product.id }}"
+              >
+                ❤️
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {% endfor %}
       </div>
     </div>
   </div>
-  {% endfor %}
 </div>
 {% endblock %} {% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const toastElement = document.getElementById("cart-toast");
-    const toastMessage = document.getElementById("toast-message");
-    const toast = new bootstrap.Toast(toastElement);
-    const wishlistToastElement = document.getElementById("wishlist-toast");
-    const wishlistToastMessage = document.getElementById(
-      "wishlist-toast-message"
-    );
-    const wishlistToast = new bootstrap.Toast(wishlistToastElement);
+  function fetchFilteredProducts() {
+    const selectedCategories = $(".category-filter:checked")
+      .map(function () {
+        return $(this).val();
+      })
+      .get();
 
-    document.querySelectorAll(".add-to-cart-btn").forEach((button) => {
-      button.addEventListener("click", function () {
-        const productId = this.getAttribute("data-id");
+    $.ajax({
+      url: "{% url 'filter_products' %}",
+      data: { "category[]": selectedCategories },
+      dataType: "json",
+      success: function (data) {
+        $("#product-list").empty();
 
-        fetch(`/add-to-cart/${productId}/`, {
-          method: "GET",
-          headers: {
-            "X-Requested-With": "XMLHttpRequest",
-          },
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            toastMessage.innerText = `${data.productName} added to cart`;
-            toast.show();
-
-            // ✅ Optional: Update cart count in navbar
-            const cartCountSpan = document.getElementById("cart-count");
-            if (cartCountSpan) {
-              cartCountSpan.innerText = data.cartCount;
-            }
-          })
-          .catch((error) => {
-            console.error("Error:", error);
+        if (data.products.length === 0) {
+          $("#product-list").append("<p>No products found.</p>");
+        } else {
+          data.products.forEach(function (product) {
+            $("#product-list").append(`
+              <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                  <img src="${product.image_url}" class="card-img-top" height="200" style="object-fit: cover" />
+                  <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">${product.name}</h5>
+                    <p class="card-text">${product.category}</p>
+                    <p class="fw-bold">Rs. ${product.price}</p>
+                    <div class="mt-auto">
+                      <button class="btn btn-primary add-to-cart-btn" data-id="${product.id}">Add to Cart</button>
+                      <button class="btn btn-outline-danger btn-sm wishlist-btn" data-id="${product.id}">❤️</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `);
           });
-      });
+        }
+      },
     });
-    document.querySelectorAll(".wishlist-btn").forEach((button) => {
-      button.addEventListener("click", function () {
-        const productId = this.getAttribute("data-id");
-        fetch(`/add-to-wishlist/${productId}/`, {
-          method: "GET",
-          headers: { "X-Requested-With": "XMLHttpRequest" },
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            wishlistToastMessage.innerText = `${data.productName} - ${data.message}`;
-            wishlistToast.show();
+  }
 
-            const wishlistCountSpan = document.getElementById("wishlist-count");
-            if (wishlistCountSpan) {
-              wishlistCountSpan.innerText = data.wishlistCount;
-            }
-          })
-          .catch(console.error);
-      });
+  $(document).ready(function () {
+    $(".category-filter").on("change", fetchFilteredProducts);
+
+    // Cart and wishlist functionality
+    $(document).on("click", ".add-to-cart-btn", function () {
+      const productId = $(this).data("id");
+
+      fetch(`/add-to-cart/${productId}/`, {
+        method: "GET",
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          const toastMessage = document.getElementById("toast-message");
+          const toast = new bootstrap.Toast(
+            document.getElementById("cart-toast")
+          );
+          toastMessage.innerText = `${data.productName} added to cart`;
+          toast.show();
+
+          const cartCountSpan = document.getElementById("cart-count");
+          if (cartCountSpan) {
+            cartCountSpan.innerText = data.cartCount;
+          }
+        })
+        .catch(console.error);
     });
-    
+
+    $(document).on("click", ".wishlist-btn", function () {
+      const productId = $(this).data("id");
+
+      fetch(`/add-to-wishlist/${productId}/`, {
+        method: "GET",
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          const toastMessage = document.getElementById(
+            "wishlist-toast-message"
+          );
+          const toast = new bootstrap.Toast(
+            document.getElementById("wishlist-toast")
+          );
+          toastMessage.innerText = `${data.productName} - ${data.message}`;
+          toast.show();
+
+          const wishlistCountSpan = document.getElementById("wishlist-count");
+          if (wishlistCountSpan) {
+            wishlistCountSpan.innerText = data.wishlistCount;
+          }
+        })
+        .catch(console.error);
+    });
   });
 </script>
 {% endblock %}
