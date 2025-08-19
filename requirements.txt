@@ -1,0 +1,5 @@
+Django
+Pillow
+python-dotenv
+xhtml2pdf
+stripe
