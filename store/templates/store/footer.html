@@ -1,0 +1,155 @@
+<!-- store/footer.html -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+
+<style>
+  .footer-modern {
+    background: #fff0f6; /* light pastel pink background */
+    padding: 2.4rem 0 0.6rem 0;
+    border-top: 1px solid #fce4eb; /* pink border */
+    text-align: center;
+    color: #bf3f72; /* pastel pink text */
+    letter-spacing: 0.02em;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .footer-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 2em;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 0.2em;
+    color: #de3c71; /* strong pink */
+  }
+  .footer-banner {
+    display: inline-block;
+    margin: 0.2em auto 1em auto;
+    font-size: 1em;
+    font-weight: 600;
+    letter-spacing: 3px;
+    padding: 4px 24px;
+    border-radius: 6px;
+    color: #fff;
+    background: #de3c71; /* pastel pink background */
+    font-family: inherit;
+  }
+  .footer-social {
+    display: flex;
+    justify-content: center;
+    gap: 36px;
+    margin: 1.5em 0 1.7em 0;
+  }
+  .footer-social a {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 18px #f9c0db;
+    font-size: 2em;
+    transition: transform 0.3s ease;
+  }
+  .footer-social a:hover {
+    transform: scale(1.1);
+  }
+  .footer-social .facebook {
+    background: #1877f2;
+    color: white;
+  }
+  .footer-social .instagram {
+    background: #e4405f;
+    color: white;
+  }
+  .footer-social .tiktok {
+    background: #000000;
+    color: white;
+  }
+  .footer-social .tiktok svg {
+    width: 24px;
+    height: 24px;
+    fill: white;
+  }
+  .footer-social .tiktok:hover {
+    filter: brightness(85%);
+  }
+  .footer-social .facebook:hover,
+  .footer-social .instagram:hover {
+    filter: brightness(85%);
+  }
+  .footer-main {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 1em;
+    flex-wrap: wrap;
+  }
+  .footer-main a {
+    color: #bf3f72;
+    font-weight: 600;
+    text-decoration: none;
+    font-family: inherit;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    transition: color 0.2s ease;
+  }
+  .footer-main a:hover {
+    color: #ae2675;
+    text-decoration: underline;
+  }
+  .footer-about {
+    color: #a34773;
+    font-size: 1.05rem;
+    max-width: 440px;
+    margin: 1em auto 2em auto;
+    line-height: 1.5;
+  }
+  .footer-bottom {
+    border-top: 1px solid #fceaf1;
+    color: #bf3f72;
+    font-size: 1rem;
+    padding: 1rem 0;
+    font-family: inherit;
+  }
+  @media (max-width: 600px) {
+    .footer-brand {
+      font-size: 1.5rem;
+    }
+    .footer-banner {
+      font-size: 0.9rem;
+      padding: 2px 18px;
+    }
+    .footer-social a {
+      width: 45px;
+      height: 45px;
+      font-size: 1.5rem;
+    }
+  }
+</style>
+
+<footer class="footer-modern">
+  <div class="footer-brand">Latta Clothing</div>
+  <div class="footer-banner">FASHION</div>
+
+  <div class="footer-social">
+    <a href="https://www.facebook.com" target="_blank" rel="noopener" aria-label="Facebook" class="facebook" title="Facebook">
+      <i class="bi bi-facebook"></i>
+    </a>
+    <a href="https://www.instagram.com" target="_blank" rel="noopener" aria-label="Instagram" class="instagram" title="Instagram">
+      <i class="bi bi-instagram"></i>
+    </a>
+    <a href="https://www.tiktok.com" target="_blank" rel="noopener" aria-label="TikTok" class="tiktok" title="TikTok">
+      <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true" focusable="false">
+        <path d="M198.5 70.1a70.3 70.3 0 0 1-32.5-8.7v74.4a50.4 50.4 0 0 1-41.2-3.1c-2.3-1.4-4.3-3-6-4.9-5-5.6-6.2-13.8-6.8-18.7h-21.7A64.9 64.9 0 0 0 94 126.7a109.7 109.7 0 0 0 16.5 5.2v40.3a70.9 70.9 0 0 1-30.9-4.3v-34.8H51.3v28.2a69.8 69.8 0 0 1-30.8-33.2 69.8 69.8 0 1 1 124.6 17.1Z"/>
+      </svg>
+    </a>
+  </div>
+
+  <div class="footer-main">
+    <a href="{% url 'about' %}">ABOUT US</a>
+    <a href="{% url 'terms' %}">TERMS &amp; CONDITIONS</a>
+    <a href="{% url 'privacy' %}">PRIVACY POLICY</a>
+  </div>
+
+  <div class="footer-bottom">
+    Crafted With <span style="color:#de3c71;">&#10084;</span>
+  </div>
+</footer>

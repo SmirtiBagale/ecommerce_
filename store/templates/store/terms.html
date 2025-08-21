@@ -1,0 +1,73 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Terms &amp; Conditions - Latta Clothing{% endblock %}
+
+{% block content %}
+<style>
+  .terms-container {
+    max-width: 800px;
+    margin: 3rem auto;
+    padding: 2rem 1rem;
+    background-color: #fff0f6; /* very light pastel pink background */
+    border-radius: 12px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #4b2e4a; /* muted pastel purple */
+    line-height: 1.7;
+    box-shadow: 0 4px 12px rgba(222, 60, 113, 0.15);
+  }
+  .terms-container h1 {
+    text-align: center;
+    font-weight: 900;
+    font-size: 2.8rem;
+    color: #de3c71; /* pastel pink */
+    margin-bottom: 1.8rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .terms-container p,
+  .terms-container ul {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    text-align: justify;
+    font-style: italic;
+  }
+  .terms-container ul {
+    list-style-type: disc;
+    margin-left: 1.5rem;
+    color: #5a3a56;
+  }
+  .terms-container ul li {
+    margin-bottom: 0.85rem;
+    line-height: 1.5;
+  }
+  @media (max-width: 600px) {
+    .terms-container {
+      margin: 2rem 1rem;
+      padding: 1.5rem 1rem;
+    }
+    .terms-container h1 {
+      font-size: 2rem;
+    }
+    .terms-container p,
+    .terms-container ul {
+      font-size: 1rem;
+    }
+  }
+</style>
+
+<div class="terms-container">
+  <h1>Terms &amp; Conditions</h1>
+  <p>
+    Welcome to Latta Clothing. By accessing or using our website, you agree to comply with and be bound by the following terms and conditions.
+  </p>
+  <ul>
+    <li>All products are subject to availability and may change without notice.</li>
+    <li>Payment must be made in full before order fulfillment.</li>
+    <li>Returns are accepted within 14 days of delivery subject to our return policy.</li>
+    <li>We reserve the right to refuse service to anyone for any reason at any time.</li>
+  </ul>
+  <p>
+    For full details, please contact our customer support team.
+  </p>
+</div>
+{% endblock %}

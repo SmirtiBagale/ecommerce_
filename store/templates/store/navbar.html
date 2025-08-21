@@ -1,23 +1,128 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<!-- Enhanced Navbar with Pastel Pink Theme and Unified Button Styling -->
+<style>
+  /* NAVBAR STYLES: Pastel Pink Theme */
+  .navbar-custom {
+    background: linear-gradient(90deg, #ffd6ec 0%, #ffe8f3 100%);
+    box-shadow: 0 2px 16px rgba(248, 151, 187, 0.12);
+    border-bottom: 2px solid #fbbedb;
+  }
+
+  .navbar-brand {
+    color: #de3c71 !important; /* Strong pastel pink */
+    font-weight: 700;
+    font-size: 1.6rem;
+    letter-spacing: 1px;
+    padding-left: 0.6rem;
+    transition: color 0.2s;
+  }
+
+  .navbar-brand:hover, .navbar-brand:focus {
+    color: #ae2675 !important;
+    text-shadow: 0 1px 3px #ffd6ec;
+  }
+
+  .navbar-nav .nav-item .btn,
+  .navbar-nav .nav-item .nav-link {
+    border-radius: 20px;
+    margin-right: 0.3rem;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 4px rgba(248, 151, 187, 0.08);
+  }
+
+  .btn-outline-dark {
+    border-color: #de3c71 !important;
+    color: #de3c71 !important;
+    background: #fff0fa !important;
+  }
+  .btn-outline-dark:hover,
+  .btn-outline-dark:focus {
+    background: #ffd9ec !important;
+    color: #ae2675 !important;
+    border-color: #ae2675 !important;
+  }
+
+  /* Solid pastel-pink style for both Login and Register */
+  .btn-pastel-pink {
+    background: #fb7bb2 !important;
+    border-color: #fb7bb2 !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+  }
+  .btn-pastel-pink:hover,
+  .btn-pastel-pink:focus {
+    background: #de3c71 !important;
+    border-color: #ae2675 !important;
+    color: #fff !important;
+  }
+
+  .nav-link {
+    color: #de3c71 !important;
+  }
+  .nav-link:hover,
+  .nav-link:focus {
+    color: #ae2675 !important;
+    background: #ffd9ec;
+  }
+
+  .navbar-text {
+    color: #ff6fa6 !important;
+    font-weight: 500;
+    margin-right: 0.75rem;
+    letter-spacing: 0.05rem;
+  }
+
+  /* Cart/Wishlist counts styling */
+  #cart-count, #wishlist-count {
+    background: #fbb6d6;
+    color: #ae2675;
+    border-radius: 10px;
+    padding: 1px 8px;
+    font-size: 0.93em;
+    margin-left: 2px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  /* Responsive tweaks for smaller screens */
+  @media (max-width: 991px) {
+    .navbar-custom {
+      padding: 0.9rem 0.6rem;
+    }
+    .navbar-nav {
+      background: linear-gradient(90deg, #ffd6ec 0%, #ffe8f3 100%);
+      border-radius: 8px;
+      margin-top: 0.75rem;
+      box-shadow: 0 4px 14px rgba(251, 184, 207, 0.08);
+    }
+    .navbar-nav .nav-item {
+      margin-bottom: 0.5rem;
+    }
+  }
+</style>
+
+<nav class="navbar navbar-expand-lg navbar-light navbar-custom">
   <div class="container-fluid">
+    <!-- Brand/logo -->
     <a class="navbar-brand" href="{% url 'home' %}">Latta Clothing</a>
 
+    <!-- Cart and Wishlist Buttons -->
     <ul class="navbar-nav ms-auto">
+      <!-- Cart -->
       <li class="nav-item me-2">
         <a href="{% url 'view_cart' %}" class="btn btn-outline-dark">
-          🛒 Cart (<span id="cart-count"
-            >{{ request.session.cart|length|default:0 }}</span
-          >)
+          🛒 Cart (<span id="cart-count">{{ request.session.cart|length|default:0 }}</span>)
         </a>
       </li>
+      <!-- Wishlist -->
       <li class="nav-item me-2">
         <a href="{% url 'wishlist' %}" class="btn btn-outline-dark">
-          ❤️ Wishlist (<span id="wishlist-count"
-            >{{ request.user.wishlistitem_set.count|length|default:0  }}</span
-          >)
+          ❤️ Wishlist (<span id="wishlist-count">{{ request.user.wishlistitem_set.count|length|default:0  }}</span>)
         </a>
       </li>
 
+      <!-- Authenticated/Landing Buttons -->
       {% if user.is_authenticated %}
       <li class="nav-item me-2 d-flex align-items-center">
         <span class="navbar-text">Hello, {{ user.username }}</span>
@@ -30,19 +135,17 @@
           </button>
         </form>
       </li>
-
       {% else %}
       <li class="nav-item me-2">
-        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm"
-          >Login</a
-        >
+        <!-- Updated Login button to match Register style -->
+        <a href="{% url 'login' %}" class="btn btn-pastel-pink btn-sm">Login</a>
       </li>
       <li class="nav-item">
-        <a href="{% url 'register' %}" class="btn btn-primary btn-sm"
-          >Register</a
-        >
+        <a href="{% url 'register' %}" class="btn btn-pastel-pink btn-sm">Register</a>
       </li>
-      {% endif %} {% if user.is_authenticated %}
+      {% endif %} 
+      <!-- My Orders for logged-in users -->
+      {% if user.is_authenticated %}
       <li class="nav-item">
         <a class="nav-link" href="{% url 'my_orders' %}">My Orders</a>
       </li>

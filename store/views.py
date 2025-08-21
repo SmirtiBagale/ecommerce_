@@ -8,6 +8,7 @@ from django.contrib.auth import login
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
 from django.contrib import messages
+from django.contrib.auth.views import LoginView  # Added here
 
 from store.forms import CustomUserCreationForm
 from .models import Product, Order, OrderItem, WishlistItem
@@ -21,9 +22,9 @@ from django.conf import settings
 from .forms import ReviewForm
 from .models import Product, Review
 
-
-
-
+# Added missing CustomLoginView for login page
+class CustomLoginView(LoginView):
+    template_name = 'store/login.html'
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 def home(request):
@@ -34,7 +35,6 @@ def home(request):
         'products': products,
         'categories': categories,
     })
-
 
 def filter_products(request):
     selected_categories = request.GET.getlist('category[]')
@@ -53,9 +53,6 @@ def filter_products(request):
         })
 
     return JsonResponse({'products': data})
-
-
-
 
 def add_to_cart(request, product_id):
     """Add a product to the cart stored in session."""
@@ -88,7 +85,6 @@ def add_to_cart(request, product_id):
 
     return redirect('view_cart')
 
-
 def view_cart(request):
     """Show all cart items with total price."""
     cart = request.session.get('cart', {})
@@ -110,7 +106,6 @@ def view_cart(request):
 
     return render(request, 'store/cart.html', {'cart_items': cart_items, 'total': total})
 
-
 def remove_from_cart(request, product_id):
     """Remove a product from the cart."""
     cart = request.session.get('cart', {})
@@ -118,7 +113,6 @@ def remove_from_cart(request, product_id):
         del cart[str(product_id)]
     request.session['cart'] = cart
     return redirect('view_cart')
-
 
 def update_cart(request, product_id, action):
     """Increase or decrease quantity of a cart item."""
@@ -136,7 +130,6 @@ def update_cart(request, product_id, action):
     request.session['cart'] = cart
     return redirect('view_cart')
 
-
 @login_required
 def add_to_wishlist(request, product_id):
     """Add product to user's wishlist."""
@@ -146,7 +139,6 @@ def add_to_wishlist(request, product_id):
     wishlist_count = WishlistItem.objects.filter(user=request.user).count()
     return JsonResponse({'message': message, 'wishlistCount': wishlist_count, 'productName': product.name})
 
-
 @login_required
 def remove_from_wishlist(request, product_id):
     """Remove product from user's wishlist."""
@@ -154,7 +146,6 @@ def remove_from_wishlist(request, product_id):
     WishlistItem.objects.filter(user=request.user, product=product).delete()
     wishlist_count = WishlistItem.objects.filter(user=request.user).count()
     return JsonResponse({'message': "Removed from wishlist", 'wishlistCount': wishlist_count, 'productName': product.name})
-
 
 def wishlist_view(request):
     """Display logged-in user's wishlist."""
@@ -164,22 +155,6 @@ def wishlist_view(request):
     items = WishlistItem.objects.filter(user=request.user).select_related('product')
     return render(request, 'store/wishlist.html', {'wishlist_items': items})
 
-
-# def register(request):
-#     """User registration view."""
-#     if request.user.is_authenticated:
-#         return redirect('home')
-
-#     if request.method == 'POST':
-#         form = UserCreationForm(request.POST)
-#         if form.is_valid():
-#             user = form.save()
-#             login(request, user)
-#             return redirect('home')
-#     else:
-#         form = UserCreationForm()
-
-#     return render(request, 'store/register.html', {'form': form})
 def register(request):
     """Enhanced user registration view with email support."""
     if request.user.is_authenticated:
@@ -213,20 +188,6 @@ def register(request):
         'title': 'Create Account'
     })
 
-
-# class UserRegisterView(CreateView):
-#     """Class-based user registration view."""
-#     form_class = UserCreationForm
-#     template_name = 'store/register.html'
-#     success_url = reverse_lazy('login')
-
-#     def form_valid(self, form):
-#         user = form.save(commit=False)
-#         user.is_staff = False
-#         user.is_superuser = False
-#         user.save()
-#         return super().form_valid(form)
-
 class UserRegisterView(CreateView):
     """Enhanced class-based registration view with email support."""
     form_class = CustomUserCreationForm  # Using custom form
@@ -257,7 +218,6 @@ class UserRegisterView(CreateView):
         
         messages.success(self.request, "Registration successful! Welcome!")
         return response
-
 
 @login_required
 def checkout(request):
@@ -306,7 +266,6 @@ def checkout(request):
 
     return render(request, 'store/checkout.html')
 
-
 def create_checkout_session(request):
     """Create Stripe checkout session and redirect user to payment page."""
     order_id = request.session.get('order_id')
@@ -337,11 +296,9 @@ def create_checkout_session(request):
 
     return redirect(session.url)
 
-
 def order_success(request):
     """Render order success page after successful payment or COD."""
     return render(request, 'store/order_success.html')
-
 
 @login_required
 def my_orders(request):
@@ -384,7 +341,6 @@ def order_detail(request, order_id):
     }
     return render(request, 'store/order_detail.html', context)
 
-
 @login_required
 def download_invoice(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
@@ -398,6 +354,7 @@ def download_invoice(request, order_id):
     if pisa_status.err:
         return HttpResponse('Failed to generate PDF', status=500)
     return response
+
 @login_required
 def cancel_order(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
@@ -421,7 +378,6 @@ def cancel_order(request, order_id):
         messages.warning(request, 'Order cannot be cancelled.')
 
     return redirect('order_detail', order_id=order.id)
-
 
 @login_required
 def product_detail(request, product_id):
@@ -450,3 +406,15 @@ def product_detail(request, product_id):
         'form': form,
     }
     return render(request, 'store/product_detail.html', context)
+
+
+    # Add these simple views at the end of your views.py
+
+def about(request):
+    return render(request, 'store/about.html')
+
+def terms(request):
+    return render(request, 'store/terms.html')
+
+def privacy(request):
+    return render(request, 'store/privacy.html')

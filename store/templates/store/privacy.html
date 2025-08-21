@@ -1,0 +1,60 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Privacy Policy - Latta Clothing{% endblock %}
+
+{% block content %}
+<style>
+  .privacy-container {
+    max-width: 800px;
+    margin: 3rem auto;
+    padding: 2rem 1rem;
+    background-color: #fff0f6; /* very light pastel pink background */
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(222, 60, 113, 0.15);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #4b2e4a; /* muted pastel purple */
+    line-height: 1.7;
+  }
+  .privacy-container h1 {
+    text-align: center;
+    font-weight: 900;
+    font-size: 2.8rem;
+    color: #de3c71; /* pastel pink */
+    margin-bottom: 1.8rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .privacy-container p {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    text-align: justify;
+    font-style: italic;
+  }
+  @media (max-width: 600px) {
+    .privacy-container {
+      margin: 2rem 1rem;
+      padding: 1.5rem 1rem;
+    }
+    .privacy-container h1 {
+      font-size: 2rem;
+    }
+    .privacy-container p {
+      font-size: 1rem;
+    }
+  }
+</style>
+
+<div class="privacy-container">
+  <h1>Privacy Policy</h1>
+  <p>
+    We value your privacy. Latta Clothing collects and uses personal information solely to process and fulfill your orders,
+    improve our services, and communicate important updates.
+  </p>
+  <p>
+    We do not share your personal data with third parties except as required to complete transactions or as mandated by law.
+  </p>
+  <p>
+    By using our website, you consent to the collection and use of information in accordance with this policy.
+  </p>
+</div>
+{% endblock %}

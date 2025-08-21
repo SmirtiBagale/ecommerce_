@@ -1,0 +1,63 @@
+{% extends 'store/base.html' %}
+
+{% block title %}About Us - Latta Clothing{% endblock %}
+
+{% block content %}
+<style>
+  .about-container {
+    max-width: 800px;
+    margin: 3rem auto;
+    padding: 0 1rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #4b2e4a; /* muted pastel purple */
+    line-height: 1.7;
+  }
+  .about-container h1 {
+    text-align: center;
+    font-weight: 900;
+    font-size: 2.8rem;
+    color: #de3c71; /* pastel pink */
+    margin-bottom: 1.5rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .about-container p {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    text-align: justify;
+    background-color: #fff0f6; /* pastel pink background */
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-style: italic;
+  }
+  @media (max-width: 600px) {
+    .about-container {
+      margin: 2rem 1rem;
+    }
+    .about-container h1 {
+      font-size: 2rem;
+    }
+    .about-container p {
+      font-size: 1rem;
+    }
+  }
+</style>
+
+<div class="about-container">
+  <h1>About Us</h1>
+  <p>
+    Latta Clothing is a premier Nepali fashion brand, committed to delivering quality, sustainable,
+    and stylish apparel for men and women. We blend traditional craftsmanship with modern designs,
+    creating timeless pieces that celebrate Nepali culture and global trends alike.
+  </p>
+  <p>
+    Our mission is to bring you comfortable, eco-friendly fashion at affordable prices while supporting
+    local artisans and sustainable practices.
+  </p>
+  <p>
+    At Latta Clothing, we believe that fashion is an expression of identity and culture. Through our collections,
+    we aim to connect heritage with contemporary styles, empowering you to make a statement that is both meaningful and fashionable.
+  </p>
+</div>
+
+{% endblock %}
